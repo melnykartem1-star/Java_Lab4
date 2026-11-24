@@ -4,11 +4,17 @@ import HardTask.Maps.LRUCache;
 import HardTask.Sets.MyLinkedHashSet;
 
 void main(){
-
-};
+    testArrayList();
+    IO.println();
+    testLinkedList();
+    IO.println();
+    testLinkedHashSet();
+    IO.println();
+    testLRUCache();
+}
 
 public static void testLinkedHashSet() {
-    MyLinkedHashSet set = new MyLinkedHashSet();
+    MyLinkedHashSet<String> set = new MyLinkedHashSet<>();
 
     System.out.println(set.add("Artem"));
     System.out.println(set.add("Ivan"));
@@ -25,7 +31,7 @@ public static void testLinkedHashSet() {
 }
 
 public static void testLRUCache() {
-    LRUCache cache = new LRUCache(3);
+    LRUCache<String, String> cache = new LRUCache<>(3);
 
     cache.put("A", "Walter");
     cache.put("B", "Jesse");
@@ -46,14 +52,19 @@ public static void testLRUCache() {
 }
 
 public static void testLinkedList(){
-    Object[] array1 = {"Josh", "Morgan"};
-    Object[] array2 = {"Rick", "Deb"};
+    MyLinkedList<String> myTestList1 = new MyLinkedList<>();
+    myTestList1.add("Josh");
+    myTestList1.add("Morgan");
 
-    MyLinkedList myList = new MyLinkedList();
+    MyLinkedList<String> myTestList2 = new MyLinkedList<>();
+    myTestList2.add("Rick");
+    myTestList2.add("Deb");
+
+    MyLinkedList<String> myList = new MyLinkedList<>();
     myList.add("Artem");
     myList.add(0, "Sevil");
-    myList.addAll(array1);
-    myList.addAll(2, array2);
+    myList.addAll(myTestList1);
+    myList.addAll(2, myTestList2);
 
     IO.println(myList.get(2));
     IO.println(myList.remove(2));
@@ -64,14 +75,19 @@ public static void testLinkedList(){
 }
 
 public static void testArrayList(){
-    Object[] array1 = {"Josh", "Morgan"};
-    Object[] array2 = {"Rick", "Deb"};
+    MyArrayList<String> myTestList1 = new MyArrayList<>();
+    myTestList1.add("Josh");
+    myTestList1.add("Morgan");
 
-    MyArrayList myList = new MyArrayList();
+    MyArrayList<String> myTestList2 = new MyArrayList<>();
+    myTestList2.add("Rick");
+    myTestList2.add("Deb");
+
+    MyArrayList<String> myList = new MyArrayList<>();
     myList.add("Artem");
     myList.add(0, "Sevil");
-    myList.addAll(array1);
-    myList.addAll(2, array2);
+    myList.addAll(myTestList1);
+    myList.addAll(2, myTestList2);
 
     IO.println(myList.get(2));
     IO.println(myList.remove(2));
@@ -79,4 +95,5 @@ public static void testArrayList(){
     IO.println(myList.indexOf("Fake"));
     IO.println(myList.size());
     IO.println(Arrays.toString(myList.toArray()));
+
 }

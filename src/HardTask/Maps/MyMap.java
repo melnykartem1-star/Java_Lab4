@@ -1,17 +1,17 @@
 package HardTask.Maps;
 
-public interface MyMap {
+public interface MyMap<K, V> {
 
-    Object put(Object key, Object value);
-    Object get(Object key);
-    Object remove(Object key);
-    boolean containsKey(Object key);
+    V put(K key, V value);
+    V get(K key);
+    V remove(K key);
+    boolean containsKey(K key);
     int size();
 
-    interface Entry{
-        Object getKey();
-        Object getValue();
-        Object setValue(Object value);
+    interface Entry<K, V>{
+        K getKey();
+        V getValue();
+        V setValue(V value);
         boolean equals(Object o);
         int hashCode();
     }

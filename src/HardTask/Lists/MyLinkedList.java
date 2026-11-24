@@ -1,29 +1,31 @@
 package HardTask.Lists;
 
+import HardTask.MyCollection;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-public class MyLinkedList implements MyList {
+public class MyLinkedList <E> implements MyList<E> {
 
     private int size = 0;
-    private MyLinkedList.Node first;
-    private MyLinkedList.Node last;
+    private Node<E> first;
+    private Node<E> last;
 
-    private class Node {
-        Object item;
-        MyLinkedList.Node next;
-        MyLinkedList.Node prev;
+    private static class Node<E> {
+        E item;
+        Node<E> next;
+        Node<E> prev;
 
-        Node(MyLinkedList.Node prev, Object element, MyLinkedList.Node next) {
+        Node(Node<E> prev, E element, Node<E> next) {
             this.item = element;
             this.next = next;
             this.prev = prev;
         }
     }
 
-    private class MyLinkedIterator implements Iterator<MyLinkedList.Node>{
-        private MyLinkedList.Node node = first;
+    private class MyLinkedIterator implements Iterator<E> {
+        private Node<E> node = first;
 
         @Override
         public boolean hasNext() {
@@ -31,9 +33,18 @@ public class MyLinkedList implements MyList {
         }
 
         @Override
-        public MyLinkedList.Node next(){
+        public E next(){
             if(hasNext()){
-                Node res = node;
+                Node<E> res = node;
+                node = node.next;
+                return res.item;
+            }
+            throw new NoSuchElementException();
+        }
+
+        private Node<E> nextNode(){
+            if(hasNext()){
+                Node<E> res = node;
                 node = node.next;
                 return res;
             }
@@ -42,10 +53,15 @@ public class MyLinkedList implements MyList {
     }
 
     @Override
-    public void add(Object e){
+    public Iterator<E> iterator() {
+        return new MyLinkedIterator();
+    }
+
+    @Override
+    public void add(E e){
         Objects.requireNonNull(e, "Null elements are not allowed");
-        MyLinkedList.Node lastNode = last;
-        MyLinkedList.Node newNode = new MyLinkedList.Node(lastNode, e, null);
+        Node<E> lastNode = last;
+        Node<E> newNode = new Node<>(lastNode, e, null);
         last = newNode;
         if (lastNode == null)
             first = newNode;
@@ -55,10 +71,10 @@ public class MyLinkedList implements MyList {
 
     }
 
-    public void prepend(Object e){
+    public void prepend(E e){
         Objects.requireNonNull(e, "Null elements are not allowed");
-        MyLinkedList.Node fisrtNode = first;
-        MyLinkedList.Node newNode = new MyLinkedList.Node(null, e, fisrtNode);
+        Node<E> fisrtNode = first;
+        Node<E> newNode = new Node<>(null, e, fisrtNode);
         first = newNode;
         if(fisrtNode == null){
             last = newNode;
@@ -70,7 +86,7 @@ public class MyLinkedList implements MyList {
     }
 
     @Override
-    public void add(int index, Object element){
+    public void add(int index, E element){
         Objects.requireNonNull(element, "Null elements are not allowed");
         if(!isPositionIndex(index)){
             throw new IndexOutOfBoundsException();
@@ -80,9 +96,9 @@ public class MyLinkedList implements MyList {
         } else if (index == size) {
             add(element);
         }else {
-            MyLinkedList.Node nextNode = find(index);
-            MyLinkedList.Node prevNode = nextNode.prev;
-            MyLinkedList.Node newNode = new MyLinkedList.Node(prevNode, element, nextNode);
+            Node<E> nextNode = find(index);
+            Node<E> prevNode = nextNode.prev;
+            Node<E> newNode = new Node<>(prevNode, element, nextNode);
             prevNode.next = newNode;
             nextNode.prev = newNode;
             size++;
@@ -90,36 +106,36 @@ public class MyLinkedList implements MyList {
     }
 
     @Override
-    public void addAll(Object[] c){
-        for (Object o : c) {
+    public void addAll(MyCollection<? extends E> c){
+        for (E o : c) {
             add(o);
         }
     }
 
     @Override
-    public void addAll(int index, Object[] c){
+    public void addAll(int index, MyCollection<? extends E> c){
         if(!isPositionIndex(index)){
             throw new IndexOutOfBoundsException();
         }
         int indexShift = 0;
-        for (Object o : c) {
+        for (E o : c) {
             add(index + indexShift, o);
             indexShift++;
         }
     }
 
     @Override
-    public Object get(int index) {
+    public E get(int index) {
         if(!isElementIndex(index)){
             throw new IndexOutOfBoundsException();
         }
         return find(index).item;
     }
 
-    public Object removeLast(){
-        MyLinkedList.Node lastNode = last;
+    public E removeLast(){
+        Node<E> lastNode = last;
         if(lastNode == null){throw new NoSuchElementException("No elements in list");}
-        MyLinkedList.Node prevNode = lastNode.prev;
+        Node<E> prevNode = lastNode.prev;
         if(prevNode != null){
             last = prevNode;
             prevNode.next = null;
@@ -133,10 +149,10 @@ public class MyLinkedList implements MyList {
         return lastNode.item;
     }
 
-    public Object removeFirst(){
-        MyLinkedList.Node firstNode = first;
+    public E removeFirst(){
+        Node<E> firstNode = first;
         if(firstNode == null){throw new NoSuchElementException("No elements in list");}
-        MyLinkedList.Node nextNode = firstNode.next;
+        Node<E> nextNode = firstNode.next;
         if(nextNode != null){
             first = nextNode;
             nextNode.prev = null;
@@ -151,8 +167,8 @@ public class MyLinkedList implements MyList {
     }
 
     @Override
-    public Object remove(int index) {
-        MyLinkedList.Node node;
+    public E remove(int index) {
+        Node<E> node;
         if(!isElementIndex(index)){
             throw new IndexOutOfBoundsException();
         }
@@ -162,8 +178,8 @@ public class MyLinkedList implements MyList {
             return removeLast();
         }else {
             node = find(index);
-            MyLinkedList.Node prevNode = node.prev;
-            MyLinkedList.Node nextNode = node.next;
+            Node<E> prevNode = node.prev;
+            Node<E> nextNode = node.next;
             prevNode.next = nextNode;
             nextNode.prev = prevNode;
             node.prev = null;
@@ -174,17 +190,17 @@ public class MyLinkedList implements MyList {
     }
 
     @Override
-    public void set(int index, Object element) {
+    public void set(int index, E element) {
         Objects.requireNonNull(element, "Null elements are not allowed");
         if(!isElementIndex(index)){
             throw new IndexOutOfBoundsException();
         }
-        MyLinkedList.Node nextNode = find(index);
+        Node<E> nextNode = find(index);
         nextNode.item = element;
     }
 
     @Override
-    public int indexOf(Object o) {
+    public int indexOf(E o) {
         Objects.requireNonNull(o, "Null elements are not allowed");
         return find(o);
     }
@@ -198,17 +214,17 @@ public class MyLinkedList implements MyList {
     public Object[] toArray() {
         Object[] result = new Object[size];
         int i = 0;
-        for (MyLinkedList.Node x = first; x != null; x = x.next)
+        for (Node<E> x = first; x != null; x = x.next)
             result[i++] = x.item;
         return result;
     }
 
-    private MyLinkedList.Node find(int index){
+    private Node<E> find(int index){
         MyLinkedIterator listIterator = new MyLinkedIterator();
         int count = 0;
         while (listIterator.hasNext()){
             if(count == index){
-                return listIterator.next();
+                return listIterator.nextNode();
             }
             listIterator.next();
             count++;
@@ -216,11 +232,11 @@ public class MyLinkedList implements MyList {
         throw new IllegalStateException("Node not found");
     }
 
-    private int find(Object o){
+    private int find(E o){
         MyLinkedIterator listIterator = new MyLinkedIterator();
         int count = 0;
         while (listIterator.hasNext()){
-            MyLinkedList.Node node = listIterator.next();
+            Node<E> node = listIterator.nextNode();
             if(node.item.equals(o)){
                 return count;
             }

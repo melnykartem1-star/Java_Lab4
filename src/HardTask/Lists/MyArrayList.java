@@ -1,11 +1,11 @@
 package HardTask.Lists;
 
-import java.util.Arrays;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.RandomAccess;
+import HardTask.MyCollection;
 
-public class MyArrayList implements MyList, RandomAccess {
+import java.util.*;
+
+
+public class MyArrayList<E> implements MyList<E>, RandomAccess {
 
     private static final int DEFAULT_CAPACITY = 10;
     private Object[] elementData;
@@ -26,14 +26,38 @@ public class MyArrayList implements MyList, RandomAccess {
     }
 
     @Override
-    public void add(Object e) {
+    public Iterator<E> iterator() {
+        return new MyArrayIterator();
+    }
+
+    private class MyArrayIterator implements Iterator<E>{
+        private int cursor = 0;
+
+        @Override
+        public boolean hasNext() {
+            return cursor < size;
+        }
+
+        @Override
+        public E next() {
+            if(hasNext()){
+                E element = elementData(cursor);
+                cursor++;
+                return element;
+            }
+            throw new NoSuchElementException();
+        }
+    }
+
+    @Override
+    public void add(E e) {
         Objects.requireNonNull(e, "Null elements are not allowed");
         if(size == elementData.length){elementData = grow();}
         elementData[size] = e;
         size++;
     }
 
-    public void prepend(Object e){
+    public void prepend(E e){
         Objects.requireNonNull(e, "Null elements are not allowed");
         if(size == elementData.length){elementData = grow();}
         rightShift(0);
@@ -42,7 +66,7 @@ public class MyArrayList implements MyList, RandomAccess {
     }
 
     @Override
-    public void add(int index, Object element) {
+    public void add(int index, E element) {
         Objects.requireNonNull(element, "Null elements are not allowed");
         if (!isPositionIndex(index)){
             throw new IndexOutOfBoundsException();
@@ -59,47 +83,47 @@ public class MyArrayList implements MyList, RandomAccess {
     }
 
     @Override
-    public void addAll(Object[] c) {
-        for(Object o: c){
+    public void addAll(MyCollection<? extends E> c) {
+        for(E o: c){
             add(o);
         }
     }
 
     @Override
-    public void addAll(int index, Object[] c) {
+    public void addAll(int index, MyCollection<? extends E> c) {
         int indexShift = 0;
         if(!isPositionIndex(index)){
             throw new IndexOutOfBoundsException();
         }
-        for(Object o: c){
+        for(E o: c){
             add(index + indexShift, o);
             indexShift++;
         }
     }
 
     @Override
-    public Object get(int index) {
+    public E get(int index) {
         if(!isElementIndex(index)){
-            throw new NoSuchElementException();
+            throw new IndexOutOfBoundsException();
         }
-        return elementData[index];
+        return elementData(index);
     }
 
-    public Object removeLast(){
+    public E removeLast(){
         if(size == 0){
             throw new NoSuchElementException();
         }
-        Object element = elementData[size-1];
+        E element = elementData(size - 1);
         elementData[size-1] = null;
         size--;
         return element;
     }
 
-    public Object removeFirst(){
+    public E removeFirst(){
         if(size == 0){
             throw new NoSuchElementException();
         }
-        Object element = elementData[0];
+        E element = elementData(0);
         elementData[0] = null;
         leftShift(0);
         size--;
@@ -107,14 +131,14 @@ public class MyArrayList implements MyList, RandomAccess {
     }
 
     @Override
-    public Object remove(int index) {
+    public E remove(int index) {
         if(size == 0 || !isElementIndex(index)){
-            throw new NoSuchElementException();
+            throw new IndexOutOfBoundsException();
         }
         if(index == 0){return removeFirst();}
         else if (index == size - 1) {return removeLast();}
         else{
-            Object element = elementData[index];
+            E element = elementData(index);
             elementData[index] = null;
             leftShift(index);
             size--;
@@ -123,14 +147,14 @@ public class MyArrayList implements MyList, RandomAccess {
     }
 
     @Override
-    public void set(int index, Object element) {
+    public void set(int index, E element) {
         Objects.requireNonNull(element, "Null elements are not allowed");
         if (!isElementIndex(index)){throw new IndexOutOfBoundsException();}
         elementData[index] = element;
     }
 
     @Override
-    public int indexOf(Object o) {
+    public int indexOf(E o) {
         Objects.requireNonNull(o, "Null elements are not allowed");
         for(int i = 0; i < size; i++){
             if(elementData[i].equals(o)){
@@ -179,6 +203,11 @@ public class MyArrayList implements MyList, RandomAccess {
             return elementData = Arrays.copyOf(elementData, newCapacity);
         }
         return elementData = new Object[Math.max(DEFAULT_CAPACITY, minCapacity)];
+    }
+
+    @SuppressWarnings("unchecked")
+    private E elementData(int index) {
+        return (E) elementData[index];
     }
 
     private Object[] grow() {

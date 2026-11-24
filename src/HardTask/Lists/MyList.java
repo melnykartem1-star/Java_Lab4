@@ -1,14 +1,12 @@
 package HardTask.Lists;
 
-public interface MyList {
-    void add(Object e);
-    void add(int index, Object element);
-    void addAll(Object[] c);
-    void addAll(int index, Object[] c);
-    Object get(int index);
-    Object remove(int index);
-    void set(int index, Object element);
-    int indexOf(Object o);
-    int size();
-    Object[] toArray();
+import HardTask.MyCollection;
+
+public interface MyList<E> extends MyCollection<E> {
+    void add(int index, E element);
+    void addAll(int index, MyCollection<? extends E> c);
+    E remove(int index);
+    E get(int index);
+    void set(int index, E element);
+    int indexOf(E o);
 }

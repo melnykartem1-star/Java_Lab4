@@ -1,6 +1,6 @@
 package HardTask.Maps;
 
-public class LRUCache extends MyLinkedHashMap{
+public class LRUCache<K, V> extends MyLinkedHashMap<K, V>{
 
     private final int maxCapacity;
 
@@ -9,7 +9,7 @@ public class LRUCache extends MyLinkedHashMap{
         this.maxCapacity = maxCapacity;
     }
 
-    boolean removeEldestEntry(Entry first) {
+    boolean removeEldestEntry(Entry<K, V> first) {
         return size > maxCapacity;
     }
 

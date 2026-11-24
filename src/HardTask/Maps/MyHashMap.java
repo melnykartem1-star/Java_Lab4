@@ -2,38 +2,38 @@ package HardTask.Maps;
 
 import java.util.Objects;
 
-public class MyHashMap implements MyMap {
+public class MyHashMap<K, V> implements MyMap<K, V> {
 
     public static final int DEFAULT_INITIAL_CAPACITY = 16;
     public static final float DEFAULT_LOAD_FACTOR = 0.75f;
-    Node[] table;
+    Node<K, V>[] table;
     int size;
     final float loadFactor;
     int threshold;
 
-    static class Node implements Entry{
+    static class Node<K, V> implements Entry<K, V>{
         final int hash;
-        final Object key;
-        Object value;
-        Node next;
+        final K key;
+        V value;
+        Node<K, V> next;
 
-        Node(int hash, Object key, Object value, Node next) {
+        Node(int hash, K key, V value, Node<K, V> next) {
             this.hash = hash;
             this.key = key;
             this.value = value;
             this.next = next;
         }
 
-        public Object getKey() {return key;}
+        public K getKey() {return key;}
 
-        public Object getValue() {return value;}
+        public V getValue() {return value;}
 
         public final int hashCode() {
             return Objects.hashCode(key) ^ Objects.hashCode(value);
         }
 
-        public Object setValue(Object newValue) {
-           Object oldValue = value;
+        public V setValue(V newValue) {
+           V oldValue = value;
            value = newValue;
            return oldValue;
         }
@@ -41,7 +41,7 @@ public class MyHashMap implements MyMap {
         public final boolean equals(Object o) {
             if (o == this)
                 return true;
-            return o instanceof Entry e
+            return o instanceof Entry<?, ?> e
                     && Objects.equals(key, e.getKey())
                     && Objects.equals(value, e.getValue());
         }
@@ -50,8 +50,9 @@ public class MyHashMap implements MyMap {
         this(DEFAULT_INITIAL_CAPACITY, DEFAULT_LOAD_FACTOR);
     }
 
+    @SuppressWarnings("unchecked")
     public MyHashMap(int initialCapacity, float loadFactor) {
-        if (initialCapacity < 0){
+        if (initialCapacity <= 0){
             throw new IllegalArgumentException();
         }
         if (loadFactor < 0){
@@ -60,13 +61,13 @@ public class MyHashMap implements MyMap {
         this.loadFactor = loadFactor;
         int capacity = tableSizeFor(initialCapacity);
         this.threshold = (int) (loadFactor * capacity);
-        this.table = new Node[capacity];
+        this.table = (Node<K,V>[]) new Node[capacity];
     }
 
     @Override
-    public Object put(Object key, Object value) {
+    public V put(K key, V value) {
         int hash = hash(key);
-        Node node;
+        Node<K, V> node;
         int length = table.length;
         int index = (length - 1) & hash;
 
@@ -74,7 +75,7 @@ public class MyHashMap implements MyMap {
             table[index] = newNode(hash, key, value, null);
         }
         else{
-            Node existingNode;
+            Node<K, V> existingNode;
             if(node.hash == hash &&
                     (Objects.equals(key, node.key))){
                 existingNode = node;
@@ -94,50 +95,35 @@ public class MyHashMap implements MyMap {
                 }
             }
             if (existingNode != null) {
-                Object oldValue = existingNode.value;
+                V oldValue = existingNode.value;
                 existingNode.value = value;
                 afterNodeAccess(existingNode);
                 return oldValue;
             }
         }
-        if (size++ > threshold)
+        if (++size > threshold)
             resize();
         afterNodeInsertion();
         return null;
     }
 
     @Override
-    public Object get(Object key) {
-        int hash = hash(key);
-        Node currentNode = table[(table.length - 1) & hash];
-        if(currentNode != null){
-            if (currentNode.hash == hash &&
-                    (Objects.equals(key, currentNode.key))){
-                afterNodeAccess(currentNode);
-                return currentNode.value;
-            }
-            else{
-                while(currentNode != null){
-                    if(currentNode.hash == hash &&
-                            (Objects.equals(key, currentNode.key))){
-                        afterNodeAccess(currentNode);
-                        return currentNode.value;
-                    }
-                    currentNode = currentNode.next;
-                }
-            }
-
+    public V get(K key) {
+        Node<K, V> node = getNode(key);
+        if (node != null) {
+            afterNodeAccess(node);
+            return node.value;
         }
         return null;
     }
 
     @Override
-    public Object remove(Object key) {
+    public V remove(K key) {
         int hash = hash(key);
         int index = (table.length - 1) & hash;
-        Node firstNode = table[index];
+        Node<K, V> firstNode = table[index];
         if(firstNode != null){
-            Node node = null, existingNode, previousNode = null;
+            Node<K, V> node = null, existingNode, previousNode = null;
             if (firstNode.hash == hash &&
                     (Objects.equals(key, firstNode.key))){
                 node = firstNode;
@@ -176,29 +162,42 @@ public class MyHashMap implements MyMap {
     }
 
     @Override
-    public boolean containsKey(Object key) {
-        return get(key) != null;
+    public boolean containsKey(K key) {
+        return getNode(key) != null;
     }
 
-    private Node[] resize(){
-        Node[] oldTable = table;
+    private Node<K, V> getNode(K key) {
+        int hash = hash(key);
+        Node<K, V> currentNode = table[(table.length - 1) & hash];
+        while (currentNode != null) {
+            if (currentNode.hash == hash && Objects.equals(key, currentNode.key)) {
+                return currentNode;
+            }
+            currentNode = currentNode.next;
+        }
+        return null;
+    }
+
+    private Node<K, V>[] resize(){
+        Node<K, V>[] oldTable = table;
         int oldCapacity = oldTable.length;
         int newCapacity = oldTable.length << 1;
-        threshold = threshold << 1;
-        Node[] newTable = new Node[newCapacity];
+        threshold = (int) (newCapacity * loadFactor);
+        @SuppressWarnings("unchecked")
+        Node<K, V>[] newTable = (Node<K, V>[]) new Node[newCapacity];
         table = newTable;
 
         for(int i = 0; i < oldCapacity; i++){
-            Node node = oldTable[i];
+            Node<K, V> node = oldTable[i];
             if(node != null){
                 oldTable[i] = null;
                 if(node.next == null){
                     newTable[node.hash & (newCapacity - 1)] = node;
                 }
                 else{
-                    Node loHead = null, loTail = null;
-                    Node hiHead = null, hiTail = null;
-                    Node next;
+                    Node<K, V> loHead = null, loTail = null;
+                    Node<K, V> hiHead = null, hiTail = null;
+                    Node<K, V> next;
                     do{
                         next = node.next;
                         if ((node.hash & oldCapacity) == 0) {
@@ -230,13 +229,13 @@ public class MyHashMap implements MyMap {
         return newTable;
     }
 
-    Node newNode(int hash, Object key, Object value, Node next) {
-        return new Node(hash, key, value, next);
+    Node<K, V> newNode(int hash, K key, V value, Node<K, V> next) {
+        return new Node<>(hash, key, value, next);
     }
 
-    void afterNodeAccess(Node node) {}
+    void afterNodeAccess(Node<K, V> node) {}
     void afterNodeInsertion() {}
-    void afterNodeRemoval(Node node) {}
+    void afterNodeRemoval(Node<K, V> node) {}
 
     static int hash(Object key) {
         int h;

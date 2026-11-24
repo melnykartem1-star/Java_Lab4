@@ -2,28 +2,28 @@ package HardTask.Sets;
 
 import HardTask.Maps.MyHashMap;
 
-public class MyHashSet {
+public class MyHashSet<E> {
 
-    MyHashMap map;
+    MyHashMap<E, Object> map;
     static final Object PRESENT = new Object();
 
     public MyHashSet() {
-        map = new MyHashMap();
+        map = new MyHashMap<>();
     }
 
     public MyHashSet(int initialCapacity, float loadFactor) {
-        map = new MyHashMap(initialCapacity, loadFactor);
+        map = new MyHashMap<>(initialCapacity, loadFactor);
     }
 
-    public boolean add(Object e) {
+    public boolean add(E e) {
         return map.put(e, PRESENT) == null;
     }
 
-    public boolean remove(Object o) {
+    public boolean remove(E o) {
         return map.remove(o) == PRESENT;
     }
 
-    public boolean contains(Object o) {
+    public boolean contains(E o) {
         return map.containsKey(o);
     }
 
